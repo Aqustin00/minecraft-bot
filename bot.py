@@ -1,14 +1,13 @@
-from dotenv import load_dotenv
 import discord
 import asyncio
 from mcstatus import JavaServer
 import os
 
-load_dotenv()
+# Ya no necesitas load_dotenv() aquí si lo estás manejando desde Railway
 
-TOKEN = os.getenv("TOKEN")
-MC_SERVER_IP = os.getenv("MC_SERVER_IP")
-CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
+TOKEN = os.getenv("TOKEN")  # Asegúrate de que esta variable esté configurada en Railway
+MC_SERVER_IP = os.getenv("MC_SERVER_IP")  # Asegúrate de que esta variable esté configurada en Railway
+CHANNEL_ID = int(os.getenv("CHANNEL_ID"))  # Asegúrate de que esta variable esté configurada en Railway
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
