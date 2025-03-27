@@ -1,18 +1,20 @@
+from dotenv import load_dotenv
 import discord
 import asyncio
 from mcstatus import JavaServer
 import os
 
-TOKEN = os.getenv("TOKEN")  # Token del bot de Discord
-MC_SERVER_IP = os.getenv("MC_SERVER_IP")  # IP del servidor de Minecraft
-CHANNEL_ID = int(os.getenv("CHANNEL_ID"))  # ID del canal donde enviará los avisos
-CHECK_INTERVAL = 30  # Segundos entre chequeos
+load_dotenv()
+
+TOKEN = os.getenv("TOKEN")
+MC_SERVER_IP = os.getenv("MC_SERVER_IP")
+CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 
-server_was_online = False  # Estado previo del servidor
-message = None  # Variable para almacenar el mensaje enviado
+server_was_online = False
+message = None
 
 async def check_server():
     global server_was_online, message
@@ -25,29 +27,27 @@ async def check_server():
             status = server.status()
             player_count = status.players.online
             max_players = status.players.max
-            player_names = status.players.sample  # Obtiene una lista de los jugadores conectados
+            player_names = status.players.sample
 
-            # Crear un mensaje con los nombres de los jugadores si hay jugadores conectados
             if player_names:
                 player_list = "\n".join([player.name for player in player_names])
             else:
                 player_list = "No hay jugadores conectados."
 
-            if not server_was_online:  # Si el servidor está ONLINE por primera vez
+            if not server_was_online:
                 message = await channel.send(f"🎮 El servidor de Minecraft está **ONLINE**! 🟢\nJugadores: {player_count}/{max_players}\n{player_list}")
                 server_was_online = True
             else:
-                # Actualiza el mensaje con la nueva cantidad de jugadores y sus nombres
                 await message.edit(content=f"🎮 El servidor de Minecraft está **ONLINE**! 🟢\nJugadores: {player_count}/{max_players}\n{player_list}")
 
-        except:
+        except Exception as e:
+            print(f"Error al obtener el estado del servidor: {e}")
             if server_was_online:
-                # Si el servidor está offline, envía el mensaje de apagado
                 await channel.send("⚠️ El servidor de Minecraft se ha **apagado**. 🔴")
             server_was_online = False
-            message = None  # Restablecer el mensaje cuando el servidor está apagado
+            message = None
 
-        await asyncio.sleep(CHECK_INTERVAL)
+        await asyncio.sleep(30)
 
 @client.event
 async def on_ready():
@@ -55,6 +55,3 @@ async def on_ready():
     client.loop.create_task(check_server())
 
 client.run(TOKEN)
-
-
-
